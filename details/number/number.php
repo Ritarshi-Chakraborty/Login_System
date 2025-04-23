@@ -7,25 +7,32 @@
         exit();
     }
 
-    if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $user = $_SESSION['userCred'];
-        $mobile_number = "+91".$_POST['number'];
-
-        // Check if the user already has a full name
-        $check_query = "SELECT `fullname` FROM `user_credentials` WHERE `email` = '$user'";
-        $check_result = mysqli_query($conn, $check_query);
-
+        $mobile_number = "+91" . $_POST['number'];
+    
+        // Use prepared statement to check if the user exists
+        $check_query = "SELECT `fullname` FROM `user_credentials` WHERE `email` = ?";
+        $stmt_check = mysqli_prepare($conn, $check_query);
+        mysqli_stmt_bind_param($stmt_check, "s", $user);  // 's' denotes a string (email)
+        mysqli_stmt_execute($stmt_check);
+        $check_result = mysqli_stmt_get_result($stmt_check);
+    
         if (mysqli_num_rows($check_result) > 0) {
-            // User exists: update fullname
-            $update_query = "UPDATE `user_credentials` SET `phone_number` = '$mobile_number' WHERE `email` = '$user'";
-            $result = mysqli_query($conn, $update_query);
+            // User exists: update phone number
+            $update_query = "UPDATE `user_credentials` SET `phone_number` = ? WHERE `email` = ?";
+            $stmt_update = mysqli_prepare($conn, $update_query);
+            mysqli_stmt_bind_param($stmt_update, "ss", $mobile_number, $user);  // 'ss' for two strings
+            $result = mysqli_stmt_execute($stmt_update);
         } 
         else {
-            // User not found: insert fullname
-            $insert_query = "INSERT INTO `user_credentials` (`phone_number`) VALUES ('$phone_number') WHERE `email` = '$user'";
-            $result = mysqli_query($conn, $insert_query);
+            // User not found: insert phone number
+            $insert_query = "UPDATE `user_credentials` SET `phone_number` = ? WHERE `email` = ?";
+            $stmt_insert = mysqli_prepare($conn, $insert_query);
+            mysqli_stmt_bind_param($stmt_insert, "ss", $mobile_number, $user);  // 'ss' for two strings
+            $result = mysqli_stmt_execute($stmt_insert);
         }
-
+    
         if ($result) {
             header("location: ../../response/response.php");
             exit();
@@ -55,7 +62,7 @@
             <button type="submit">Submit</button>
         </form>
         <div class="btn-wrapper">
-            <a href=".../../public/logout.php" title="Logout">Logout</a>
+            <a href="../../public/logout.php" title="Logout">Logout</a>
         </div>
     </div>
 </body>

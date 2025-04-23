@@ -17,14 +17,17 @@
         $submitted_email = $_POST['email'];
         $submitted_password = $_POST['password'];
 
-        $check_email = "SELECT * FROM `user_credentials` WHERE `email` = '$submitted_email'";
-        $result = mysqli_query($conn, $check_email);
+        // Use prepared statement to check if the email exists
+        $check_email_query = "SELECT * FROM `user_credentials` WHERE `email` = ?";
+        $stmt = mysqli_prepare($conn, $check_email_query);
+        mysqli_stmt_bind_param($stmt, "s", $submitted_email);  // 's' denotes string
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
         if(mysqli_num_rows($result) > 0) {
-            $check_password = "SELECT * FROM `user_credentials` WHERE `email` = '$submitted_email' AND `password` = '$submitted_password'";
-            $pass = mysqli_query($conn, $check_password);
+            $row  = mysqli_fetch_assoc($result);
 
-            if(mysqli_num_rows($pass) > 0) {
+            if(password_verify($submitted_password, $row["password"])) {
                 $_SESSION['userCred'] = $submitted_email;
                 header("location: ../../navigation.php?q=1");
                 exit();

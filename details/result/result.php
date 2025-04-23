@@ -6,31 +6,41 @@
         header("location: ../../public/login/login.php");
     }
 
-    if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $user = $_SESSION['userCred'];
         $result_details = explode("\n", $_POST['result']);
+    
+        // Loop through each result entry
+        foreach ($result_details as $value) {
+            // Split subject and marks using the pipe character, and trim any spaces
+            $result_parts = explode('|', $value);
+            if (count($result_parts) == 2) {
+                $subject = trim($result_parts[0]);
+                $marks = trim($result_parts[1]);
+    
+                $check_query = "SELECT * FROM `user_result` WHERE `email` = ? AND `subject` = ?";
+                $stmt_check = mysqli_prepare($conn, $check_query);
+                mysqli_stmt_bind_param($stmt_check, "ss", $user, $subject); // 'ss' for two strings
+                mysqli_stmt_execute($stmt_check);
+                $check_result = mysqli_stmt_get_result($stmt_check);
 
-        foreach($result_details as $value) {
-            $subject = trim(explode('|', $value)[0]);
-            $marks = trim(explode('|', $value)[1]);
-
-            // Check if the user already has a full name
-            $check_email = "SELECT * FROM `user_result` WHERE `email` = '$user'";
-            $check_subject = "SELECT * FROM `user_result` WHERE `email` = '$user' AND `subject` = '$subject'";
-            $check_result = mysqli_query($conn, $check_subject);
-
-            if(mysqli_num_rows($check_result) > 0) {
-                // Subject and marks exist for that user
-                $update_query = "UPDATE `user_result` SET `marks` = '$marks' WHERE `email` = '$user' AND `subject` = '$subject'";
-                $result = mysqli_query($conn, $update_query);
-            }
-            else {
-                // User not found: insert fullname
-                $insert_query = "INSERT INTO `user_result` (`email`, `subject`, `marks`) VALUES ('$user', '$subject', '$marks')";
-                $result = mysqli_query($conn, $insert_query);
+                if (mysqli_num_rows($check_result) > 0) {
+                    // Subject and marks exist for the user: update marks
+                    $update_query = "UPDATE `user_result` SET `marks` = ? WHERE `email` = ? AND `subject` = ?";
+                    $stmt_update = mysqli_prepare($conn, $update_query);
+                    mysqli_stmt_bind_param($stmt_update, "sss", $marks, $user, $subject); // 'sss' for three strings
+                    $result = mysqli_stmt_execute($stmt_update);
+                } 
+                else {
+                    // Subject doesn't exist for this user: insert new result
+                    $insert_query = "INSERT INTO `user_result` (`email`, `subject`, `marks`) VALUES (?, ?, ?)";
+                    $stmt_insert = mysqli_prepare($conn, $insert_query);
+                    mysqli_stmt_bind_param($stmt_insert, "sss", $user, $subject, $marks); // 'sss' for three strings
+                    $result = mysqli_stmt_execute($stmt_insert);
+                }
             }
         }
-
+    
         header("location: ../../navigation.php?q=4");
         exit();
     }
@@ -58,7 +68,7 @@
             <button type="submit">Next</button>
         </form>
         <div class="btn-wrapper">
-            <a href=".../../public/logout.php" title="Logout">Logout</a>
+            <a href="../../public/logout.php" title="Logout">Logout</a>
         </div>
     </div>
 </body>

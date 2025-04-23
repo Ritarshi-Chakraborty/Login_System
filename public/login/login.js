@@ -49,7 +49,6 @@ $(document).ready(function() {
         if (loginStatus === 'incorrect') {
             Swal.fire({
                 title: "Incorrect password!",
-                // text: "Please enter a valid email address.",
                 icon: "error",
                 allowOutsideClick: false,
                 allowEscapeKey: false,
@@ -60,8 +59,7 @@ $(document).ready(function() {
         else if (loginStatus === 'not found') {
             Swal.fire({
                 title: "Email Id not found!",
-                // text: "Please try again with a different email address.",
-                icon: "question",
+                icon: "warning",
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 allowEnterKey: true,

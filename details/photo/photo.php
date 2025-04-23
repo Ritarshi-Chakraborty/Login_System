@@ -7,26 +7,34 @@
         header("location: ../../public/login/login.php");
     }
 
-    if($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $user = $_SESSION['userCred'];
+        // Assuming ImagePath is a class that correctly handles file uploads and sanitizes paths
         $uploaded_image = new ImagePath("/var/www/Login_System/images/", $_FILES['image']);
-        $image = '../images/'. basename($uploaded_image->returnPath());
-
-        // Check if the user already has a full name
-        $check_query = "SELECT `photo` FROM `user_credentials` WHERE `email` = '$user'";
-        $check_result = mysqli_query($conn, $check_query);
-
+        $image = '../images/' . basename($uploaded_image->returnPath());
+    
+        // Use prepared statement to check if the user exists
+        $check_query = "SELECT `photo` FROM `user_credentials` WHERE `email` = ?";
+        $stmt_check = mysqli_prepare($conn, $check_query);
+        mysqli_stmt_bind_param($stmt_check, "s", $user); // 's' denotes a string (email)
+        mysqli_stmt_execute($stmt_check);
+        $check_result = mysqli_stmt_get_result($stmt_check);
+    
         if (mysqli_num_rows($check_result) > 0) {
-            // User exists: update fullname
-            $update_query = "UPDATE `user_credentials` SET `photo` = '$image' WHERE `email` = '$user'";
-            $result = mysqli_query($conn, $update_query);
+            // User exists: update the photo
+            $update_query = "UPDATE `user_credentials` SET `photo` = ? WHERE `email` = ?";
+            $stmt_update = mysqli_prepare($conn, $update_query);
+            mysqli_stmt_bind_param($stmt_update, "ss", $image, $user); // 'ss' for two strings
+            $result = mysqli_stmt_execute($stmt_update);
         } 
         else {
-            // User not found: insert fullname
-            $insert_query = "INSERT INTO `user_credentials` (`photo`) VALUES ('$image') WHERE `email` = '$user'";
-            $result = mysqli_query($conn, $insert_query);
+            // User not found: insert the photo
+            $insert_query = "UPDATE `user_credentials` SET `photo` = ? WHERE `email` = ?";
+            $stmt_insert = mysqli_prepare($conn, $insert_query);
+            mysqli_stmt_bind_param($stmt_insert, "ss", $image, $user); // 'ss' for two strings
+            $result = mysqli_stmt_execute($stmt_insert);
         }
-
+    
         if ($result) {
             header("location: ../../navigation.php?q=3");
             exit();
@@ -56,7 +64,7 @@
             <button type="submit">Next</button>
         </form>
         <div class="btn-wrapper">
-            <a href=".../../public/logout.php" title="Logout">Logout</a>
+            <a href="../../public/logout.php" title="Logout">Logout</a>
         </div>
     </div>
 </body>

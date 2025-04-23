@@ -1,24 +1,5 @@
 $(document).ready(function() {
-    /**
-     * Custom debounce function to delay the execution of a function until after
-     * a specified delay time has passed since the last time the function was called.
-     *
-     * @param {function} func The function to be debounced.
-     * @param {number} delay The delay time in milliseconds.
-     * @returns {function} A debounced version of the given function.
-     */
-    function debounce(func, delay) {
-        let timeout;
-
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                func.apply(this, args);
-            }, delay);
-        };
-    }
-
-    /**
+     /**
      * Handles the concatenation of the first name and last name and updates the full_name input field.
      */
     function handleFullName() {
@@ -38,7 +19,7 @@ $(document).ready(function() {
          * Ensures that only alphabetical characters and spaces are allowed.
          * Updates the full name field and manages validation messages.
          */
-        $('input[name="first_name"], input[name="last_name"]').on('input', debounce(function () {
+        $('input[name="first_name"], input[name="last_name"]').on('input', function () {
             let inputValue = $(this).val();
             let validInput = inputValue.replace(/[^a-zA-Z\s]/g, '');
             $(this).val(validInput);
@@ -66,19 +47,19 @@ $(document).ready(function() {
             else if (fieldName === 'last_name') {
                 $('.lastname-message').hide(!$(this).val().trim());
             }
-        }, 300));
+        });
 
         /**
          * Handles paste event to prevent pasting non-alphabetical characters into the first name and last name fields.
          * 
          * @param {Event} event The paste event triggered by the user.
          */
-        $('input[name="first_name"], input[name="last_name"]').on('paste', debounce(function (event) {
+        $('input[name="first_name"], input[name="last_name"]').on('paste', function (event) {
             let pastedData = event.originalEvent.clipboardData.getData('text');
             if (!/^[a-zA-Z\s]+$/.test(pastedData)) {
                 event.preventDefault();
             }
-        }, 300));
+        });
 
         /**
          * Validates the form upon submission. If any required fields are empty, it prevents form submission 

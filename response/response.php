@@ -19,8 +19,6 @@
     <title>Response</title>
     <link rel="stylesheet" href="../style.css">
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    <script src="./response.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
@@ -32,7 +30,6 @@
         </div>
         <?php echo $userDetails->getResult(); ?>
         <div class="btn-wrapper">
-            <!-- <a href="./download.php" title="Download">Download your Data</a> -->
             <a href="../public/logout.php" title="Logout">Logout</a>
         </div>
     </div>

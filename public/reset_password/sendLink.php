@@ -4,6 +4,12 @@
     use PHPMailer\PHPMailer\Exception;
     use PHPMailer\PHPMailer\SMTP;
 
+    require_once __DIR__ . '/../../vendor/autoload.php';
+
+    // Load the .env file
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__.'/../../');
+    $dotenv->load();
+
     class SendLink {
         /**
          * Undocumented variable
@@ -35,14 +41,14 @@
                 $mail->isSMTP();
                 $mail->Host       = 'smtp.gmail.com';
                 $mail->SMTPAuth   = true;
-                $mail->Username   = 'ritarshi.chakraborty@innoraft.com';
-                $mail->Password   = 'zxuu npaw ggft hnyf';
+                $mail->Username   = $_ENV['EMAIL'];
+                $mail->Password   = $_ENV['PASSWORD'];
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
                 $mail->Port       = 465;
                 /**
                  * Recipients
                  */
-                $mail->setFrom('ritarshi.chakraborty@innoraft.com', 'Ritam');
+                $mail->setFrom($_ENV['EMAIL'], $_ENV['NAME']);
                 $mail->addAddress($this->userEmail);
                 /**
                  * Content
@@ -51,7 +57,7 @@
                 $resetLink = "http://www.loginsystem.com/public/reset_password/reset.php";
                 $mail->Subject = 'Password reset link';
                 $mail->Body = "<h2>Here is the link to reset your password!</h2>
-                <a href='$resetLink'>Reset now</a>";
+                <a href='$resetLink'>Reset Link</a>";
                 
                 /**
                  * Send the mail
